@@ -32,9 +32,8 @@ public class UserController {
         }catch (Exception e) {
             return new ResponseEntity<>("Exception " + e.getMessage(),  HttpStatus.NOT_FOUND);
         }
-        finally {
             return new ResponseEntity<>("your token is: " + user.getPassword(), HttpStatus.OK);
-        }
+
     }
 }
 
