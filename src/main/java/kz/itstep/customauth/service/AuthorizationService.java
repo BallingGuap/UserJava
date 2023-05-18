@@ -1,13 +1,32 @@
 package kz.itstep.customauth.service;
 
+import kz.itstep.customauth.Exceptions.UserException;
+import kz.itstep.customauth.model.User;
+import kz.itstep.customauth.repo.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorizationService {
-    private final Integer SHIFT = 6;    
+    private UserRepository _userRepository;
+    private final Integer SHIFT = 6;
+    public void saveUser(User user) throws  UserException{
+        var generatedToken = generateToken(user.getLogin());
+        if(user == null || user.getLogin() == null) {
+         throw new UserException("User or his login is null");
+        }
+        if(_userRepository.findUserByLoginAndPassword(user.getLogin(),generatedToken)
+                                                     .isPresent()){
+            throw new UserException("System already have this user: " + user.getLogin() );
+        }
+        user.setLogin(generatedToken);
+        _userRepository.save(user);
+    }
+
     public String generateToken(String login){
         return shepherLogin(login);
     }

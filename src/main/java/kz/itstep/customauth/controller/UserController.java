@@ -1,5 +1,6 @@
 package kz.itstep.customauth.controller;
 
+import kz.itstep.customauth.Exceptions.UserException;
 import kz.itstep.customauth.model.User;
 import kz.itstep.customauth.repo.UserRepository;
 import kz.itstep.customauth.service.AuthorizationService;
@@ -20,19 +21,21 @@ import java.util.Map;
 @RequestMapping("")
 public class UserController {
     private AuthorizationService _authorizationService;
-    private UserRepository _userRepository;
+
     @PostMapping
-    public ResponseEntity<String> register(@RequestBody User user){
-        if(user.getLogin()==null){
-            return new ResponseEntity<>("no user was found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> register(@RequestBody User user) {
+        try {
+            _authorizationService.saveUser(user);
+
+        } catch (UserException e) {
+            return new ResponseEntity<>("UserException " + e.getMessage(),  HttpStatus.NOT_FOUND);
+        }catch (Exception e) {
+            return new ResponseEntity<>("Exception " + e.getMessage(),  HttpStatus.NOT_FOUND);
         }
-        else {
-            user.setPassword(
-                    _authorizationService.generateToken(user.getLogin())
-            );
-            _userRepository.save(user);
+        finally {
             return new ResponseEntity<>("your token is: " + user.getPassword(), HttpStatus.OK);
         }
     }
-
 }
+
+
